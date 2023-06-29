@@ -1,7 +1,29 @@
 import { Box, Button, Grid, HStack, Heading, Image, Skeleton, SkeletonText, Text, VStack } from "@chakra-ui/react";
 import { FaStar, FaRegHeart } from "react-icons/fa";
 import Room from "../components/Room";
+import RoomSkeleton from "../components/RoomSkeleton";
+import { useQuery } from "@tanstack/react-query"
+import { getRooms } from "../api";
+
+interface IPhoto {
+    pk: string;
+    file: string;
+    description: string
+}
+
+interface IRoom {
+    id: number
+    name: string
+    country: string
+    city: string
+    price: number
+    rating: number
+    photos: IPhoto[]
+    is_owner: boolean
+}
+
 export default function Home() {
+    const { isLoading, data } = useQuery<IRoom[]>(["rooms"], getRooms);
     return (
         //반응형으로 만들기 위해서 templateColumns 에 base를 할 것이고, object로 넘겨줄 것
         <Grid
@@ -18,13 +40,33 @@ export default function Home() {
                 lg: "repeat(3,1fr)",
                 xl: "repeat(4,1fr)",
                 "2xl": "repeat(5,1fr)",
-            }}>
-            <Box>
-                <Skeleton rounded="2xl" mb={6} height={250} />
-                <SkeletonText w="50%" noOfLines={3} />
-            </Box>
-            <Room />
 
+            }}>
+
+            {/* <Room /> */}
+            {isLoading ? (
+                <>
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                    <RoomSkeleton />
+                </>
+            ) : null}
+            {data?.map(room => <Room
+                imageURL={room.photos[0].file}
+                name={room.name}
+                rating={room.rating}
+                city={room.city}
+                country={room.country}
+                price={room.price}
+            />)}
         </Grid>
     )
 }
