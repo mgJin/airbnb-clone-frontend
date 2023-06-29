@@ -1,7 +1,7 @@
 import { Box, Button, Grid, HStack, Image, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { FaRegHeart, FaStar } from "react-icons/fa";
 
-interface RoomProps {
+interface IRoomProps {
     imageURL: string;
     name: string;
     rating: number;
