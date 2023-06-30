@@ -4,6 +4,7 @@ import Room from "../components/Room";
 import RoomSkeleton from "../components/RoomSkeleton";
 import { useQuery } from "@tanstack/react-query"
 import { getRooms } from "../api";
+import { IRoomList } from "../types";
 
 interface IPhoto {
     pk: string;
@@ -11,19 +12,10 @@ interface IPhoto {
     description: string
 }
 
-interface IRoom {
-    id: number
-    name: string
-    country: string
-    city: string
-    price: number
-    rating: number
-    photos: IPhoto[]
-    is_owner: boolean
-}
+
 
 export default function Home() {
-    const { isLoading, data } = useQuery<IRoom[]>(["rooms"], getRooms);
+    const { isLoading, data } = useQuery<IRoomList[]>(["rooms"], getRooms);
     return (
         //반응형으로 만들기 위해서 templateColumns 에 base를 할 것이고, object로 넘겨줄 것
         <Grid
@@ -60,6 +52,8 @@ export default function Home() {
                 </>
             ) : null}
             {data?.map(room => <Room
+                key={room.pk}
+                pk={room.pk}
                 imageURL={room.photos[0].file}
                 name={room.name}
                 rating={room.rating}
