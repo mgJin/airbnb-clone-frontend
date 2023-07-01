@@ -1,15 +1,54 @@
-import { Box, Button, HStack, IconButton, LightMode, Stack, useColorMode, useColorModeValue, useDisclosure } from "@chakra-ui/react";
+import { Avatar, Box, Button, HStack, IconButton, LightMode, Menu, MenuButton, MenuItem, MenuList, Stack, useColorMode, useColorModeValue, useDisclosure, useToast } from "@chakra-ui/react";
 import { FaAirbnb, FaMoon, FaSun } from "react-icons/fa";
 import LoginModal from "./LoginModal";
 import { Link } from "react-router-dom";
 import SignUpModal from "./SignUpModal";
+import useUser from "../lib/useUser";
+import { logOut } from "../api";
+
 
 export default function Header() {
-    const { isOpen: isLoginOpen, onClose: onLoginClose, onOpen: onLoginOpen } = useDisclosure();
-    const { isOpen: isSignUpOpen, onClose: onSignUpClose, onOpen: onSignUpOpen } = useDisclosure();
-    const { colorMode, toggleColorMode } = useColorMode();
+    const {
+        userLoading,
+        isLoggedIn,
+        user }
+        = useUser();
+    const {
+        isOpen: isLoginOpen,
+        onClose: onLoginClose,
+        onOpen: onLoginOpen }
+        = useDisclosure();
+    const {
+        isOpen: isSignUpOpen,
+        onClose: onSignUpClose,
+        onOpen: onSignUpOpen }
+        = useDisclosure();
+    const {
+        colorMode,
+        toggleColorMode }
+        = useColorMode();
     const logoCol = useColorModeValue("red.500", "red.300");
     const Icon = useColorModeValue(FaMoon, FaSun);
+    const toast = useToast();
+
+    const onLogOut = async () => {
+        // const data = await logOut();
+        const toastID = toast({
+            title: "Login out",
+            description: "See you soon",
+            status: "loading",
+            position: "bottom-left",
+            isClosable: true
+        })
+        setTimeout(() => {
+            toast.update(toastID, {
+                status: "success",
+                title: "updated",
+                description: "done",
+            })
+        }, 5000)
+
+    }
     return (
         <Stack
             direction={{
@@ -37,10 +76,31 @@ export default function Header() {
                     aria-label="Toggle dark mode"
                     icon={<Icon />}>
                 </IconButton>
-                <Button onClick={onLoginOpen}>Log In</Button>
-                <LightMode>
-                    <Button onClick={onSignUpOpen} colorScheme={"red"}>Sign Up</Button>
-                </LightMode>
+                {!userLoading ?
+                    (!isLoggedIn ? (
+                        <>
+                            <Button onClick={onLoginOpen}>Log In</Button>
+                            <LightMode>
+                                <Button onClick={onSignUpOpen} colorScheme={"red"}>
+                                    Sign Up
+                                </Button>
+                            </LightMode>
+                        </>
+                    ) : (
+                        <Menu>
+                            <MenuButton>
+
+                                <Avatar
+                                    name={user?.name} src={user?.profile_photo} size={"md"} />
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem onClick={onLogOut}>Log out</MenuItem>
+                            </MenuList>
+                        </Menu>
+                    )
+                    ) : null
+                }
+
             </HStack>
             <LoginModal isOpen={isLoginOpen} onClose={onLoginClose} />
             <SignUpModal isOpen={isSignUpOpen} onClose={onSignUpClose} />
