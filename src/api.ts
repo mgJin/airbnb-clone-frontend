@@ -1,4 +1,5 @@
-import axios from "axios"
+import Cookie from "js-cookie";
+import axios from "axios";
 import { QueryFunctionContext } from "@tanstack/react-query"
 
 const instance = axios.create({
@@ -32,5 +33,32 @@ export const getMe = () =>
         .then((response) => response.data);
 
 export const logOut = () =>
-    instance.post(`users/log-out`)
+    instance.post(`users/log-out`
+        , null, {
+        headers: {
+            "X-CSRFToken": Cookie.get("csrftoken") || "",
+        }
+    }
+    )
         .then((response) => response.data)
+
+
+export const githubLogin = (code: string) => instance.post(`users/github`, { code }, {
+    headers: {
+        "X-CSRFToken": Cookie.get("csrftoken") || "",
+    }
+})
+    .then((response) => response.status)
+
+
+export const kakaoLogin = (code: string) =>
+    instance.post(
+        `users/kakao`,
+        { code },
+        {
+            headers:
+            {
+                "X-CSRFToken": Cookie.get("csrftoken") || "",
+            }
+        })
+        .then((response) => response.status)
