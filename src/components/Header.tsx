@@ -1,11 +1,12 @@
-import { Avatar, Box, Button, HStack, IconButton, LightMode, Menu, MenuButton, MenuItem, MenuList, Stack, useColorMode, useColorModeValue, useDisclosure, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Button, HStack, IconButton, LightMode, Menu, MenuButton, MenuItem, MenuList, Stack, ToastId, useColorMode, useColorModeValue, useDisclosure, useToast } from "@chakra-ui/react";
 import { FaAirbnb, FaMoon, FaSun } from "react-icons/fa";
 import LoginModal from "./LoginModal";
 import { Link } from "react-router-dom";
 import SignUpModal from "./SignUpModal";
 import useUser from "../lib/useUser";
 import { logOut } from "../api";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react"
 
 
 export default function Header() {
@@ -32,24 +33,34 @@ export default function Header() {
     const Icon = useColorModeValue(FaMoon, FaSun);
     const queryClient = useQueryClient();
     const toast = useToast();
+    const toastID = useRef<ToastId>();
+    const mutation = useMutation(logOut, {
+        onMutate: () => {
+            toastID.current = toast({
+                title: "Login out",
+                description: "See you soon",
+                status: "loading",
+                position: "bottom-left",
+                isClosable: true
+            })
+        },
+        onSuccess: () => {
+            if (toastID.current) {
+                //log out 된다음 화면을 바로 바꾸고 싶을 때
+                //내가 refetch하고 싶은 query의 이름을 써주면 된다
+                queryClient.refetchQueries(["me"]);
+                toast.update(toastID.current, {
+                    status: "success",
+                    title: "updated",
+                    description: "done",
+                })
+            }
+        },
 
+    });
     const onLogOut = async () => {
-        const toastID = toast({
-            title: "Login out",
-            description: "See you soon",
-            status: "loading",
-            position: "bottom-left",
-            isClosable: true
-        })
-        const data = await logOut();
-        //log out 된다음 화면을 바로 바꾸고 싶을 때
-        //내가 refetch하고 싶은 query의 이름을 써주면 된다
-        queryClient.refetchQueries(["me"]);
-        toast.update(toastID, {
-            status: "success",
-            title: "updated",
-            description: "done",
-        })
+        mutation.mutate();
+
     }
     return (
         <Stack
