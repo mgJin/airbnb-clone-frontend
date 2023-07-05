@@ -72,6 +72,9 @@ export interface IUsernameLoginSuccess {
 }
 export interface IUsernameLoginError {
     error: string;
+    request: {
+        response: string
+    }
 }
 export const usernameLogin = ({ username, password }: IUsernameLoginVariables) =>
     instance.post(
@@ -84,3 +87,20 @@ export const usernameLogin = ({ username, password }: IUsernameLoginVariables) =
             }
         })
         .then((response) => response.data)
+
+export interface IUsernameSignupVariables extends IUsernameLoginVariables {
+    name: string;
+    email: string;
+}
+export const usernameSignup = ({ name, email, username, password }: IUsernameSignupVariables) =>
+    instance.post(
+        "users/",
+        { name, email, username, password },
+        {
+            headers:
+            {
+                "X-CSRFToken": Cookie.get("csrftoken") || "",
+            }
+        }
+    ).then((response) => response.data)
+
