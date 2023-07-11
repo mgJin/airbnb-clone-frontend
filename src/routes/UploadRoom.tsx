@@ -1,11 +1,12 @@
-import { Box, Button, Checkbox, Container, FormControl, FormHelperText, FormLabel, Grid, Heading, Input, InputGroup, InputLeftAddon, Select, Text, Textarea, VStack } from "@chakra-ui/react";
+import { Box, Button, Checkbox, Container, FormControl, FormHelperText, FormLabel, Grid, Heading, Input, InputGroup, InputLeftAddon, Select, Text, Textarea, VStack, useToast } from "@chakra-ui/react";
 import { HostOnlyPage, useHostOnlyPage } from "../components/HostOnlyPage";
 import ProtectedPage from "../components/ProtectedPage";
 import { FaBed, FaDollarSign, FaToilet } from "react-icons/fa";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { IUploadRoomVariables, getAmenities, getCategories, uploadRoom } from "../api";
-import { IAmenity, ICategory } from "../types";
+import { IAmenity, ICategory, IRoomDetail } from "../types";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 
 // 이건 다 컴포넌트로 둘러싸는 형식
@@ -32,9 +33,16 @@ export default function UploadRoom() {
     const { register, watch, handleSubmit } = useForm<IUploadRoomVariables>();
     const { data: amenities, isLoading: isAmenitiesLoading } = useQuery<IAmenity[]>(["amenities"], getAmenities);
     const { data: categories, isLoading: isCategoriesLoading } = useQuery<ICategory[]>(["categories"], getCategories)
+    const navigate = useNavigate();
+    const toast = useToast();
     const mutation = useMutation(uploadRoom, {
-        onSuccess: () => {
-            console.log("wow succeed");
+        onSuccess: (data: IRoomDetail) => {
+            toast({
+                title: "well done",
+                description: "successfully upload",
+            });
+            console.log(data);
+            navigate(`/rooms/${data.id}`);
         },
         onError: () => {
             console.log("fine, you can fix it")
