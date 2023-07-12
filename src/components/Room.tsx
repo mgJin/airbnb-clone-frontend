@@ -26,6 +26,7 @@ export default function Room({ pk, imageURL, name, rating, city, country, price,
             <VStack alignItems={"flex-start"}>
                 <Box position={"relative"} mb={2} overflow="hidden" rounded={"3xl"}>
                     <Image
+                        objectFit={"cover"}
                         minH={250}
                         src={imageURL} />
                     <Button onClick={onCameraClick} variant={"unstyled"} cursor={"pointer"} position={"absolute"} top={0} right={0} color={"white"}>
