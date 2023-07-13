@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom"
-import { getRoom, getRoomReviews } from "../api";
+import { checkBooking, getRoom, getRoomReviews } from "../api";
 import { IReview, IRoomDetail } from "../types";
-import { Avatar, Box, Container, Grid, GridItem, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react";
+import { Avatar, Box, Button, Container, Grid, GridItem, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { FaStar } from "react-icons/fa";
 import UploadPhotos from "./UploadPhotos";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 
 export default function RoomDetail() {
     const tempArray: number[] = [0, 1, 2, 3, 4]
@@ -15,12 +16,18 @@ export default function RoomDetail() {
     const { isLoading, data } = useQuery<IRoomDetail>([`rooms`, roomPk], getRoom)
     const { data: reviewsData, isLoading: isReviewsLoading } = useQuery<IReview[]>([`rooms`, roomPk, `reviews`], getRoomReviews)
     const tempRange: number[] = tempArray.slice(0, data?.photos.length)
-    const [dates, setDates] = useState<Date>(new Date());
+    const [dates, setDates] = useState<Date[]>();
+    const { data: checkBookingData, isLoading: isLoadingCheckBooking, refetch } = useQuery(
+        ["check", dates, roomPk],
+        checkBooking, {
+        cacheTime: 0,
+        enabled: dates !== undefined,
+    })
 
     const onChange = (event: any) => {
         setDates(event);
     }
-    console.log(dates);
+    console.log(`t or f ? : ${checkBookingData?.ok}`)
     return (
         <Box
             mt={10}
@@ -28,6 +35,11 @@ export default function RoomDetail() {
                 base: 10,
                 lg: 40
             }}>
+            <Helmet>
+                <title>
+                    {data ? data.name : "Loading..."}
+                </title>
+            </Helmet>
             <Skeleton height={"43px"} w={"25%"} isLoaded={!isLoading}>
                 <Heading>{data?.name}</Heading>
             </Skeleton>
@@ -59,7 +71,7 @@ export default function RoomDetail() {
                 <Box>
                     <HStack
                         justifyContent={"space-between"}
-                        w={"70%"}>
+                        w={"100%"}>
 
                         <VStack alignItems={"flex-start"}>
                             <Skeleton isLoaded={!isLoading} h={"20px"}>
@@ -118,6 +130,16 @@ export default function RoomDetail() {
                 </Box>
                 <Box pt={10}>
                     <Calendar selectRange onChange={onChange} minDate={new Date()} maxDate={new Date(Date.now() + (60 * 60 * 24 * 7 * 4 * 6 * 1000))} prev2Label={null} next2Label={null} minDetail="month" />
+                    <Button
+                        isLoading={isLoadingCheckBooking}
+                        isDisabled={!checkBookingData?.ok}
+                        mt={5}
+                        w="100%"
+                        colorScheme="red"
+                    >
+                        Make Booking
+                    </Button>
+                    {!isLoadingCheckBooking && !checkBookingData?.ok ? <Text color={"red.200"}>Can't book on these dates</Text> : null}
                 </Box>
             </Grid>
         </Box>

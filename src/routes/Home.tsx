@@ -5,7 +5,6 @@ import RoomSkeleton from "../components/RoomSkeleton";
 import { useQuery } from "@tanstack/react-query"
 import { getRooms } from "../api";
 import { IRoomList } from "../types";
-
 interface IPhoto {
     pk: string;
     file: string;
@@ -18,6 +17,7 @@ export default function Home() {
     const { isLoading, data } = useQuery<IRoomList[]>(["rooms"], getRooms);
     return (
         //반응형으로 만들기 위해서 templateColumns 에 base를 할 것이고, object로 넘겨줄 것
+
         <Grid
             mt={10}
             px={{
